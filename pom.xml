@@ -3,7 +3,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.corundumstudio.socketio</groupId>
+  <groupId>com.om7sense.libs</groupId>
   <artifactId>netty-socketio</artifactId>
   <version>2.0.7-SNAPSHOT</version>
   <packaging>bundle</packaging>
@@ -40,12 +40,21 @@
     </developer>
   </developers>
 
+  <repositories>
+    <repository>
+      <id>gitlab-maven</id>
+      <url>https://gitlab.com/api/v4/groups/om7sense/-/packages/maven</url>
+    </repository>
+  </repositories>
   <distributionManagement>
     <repository>
-      <id>repo1</id>
-      <name>Release</name>
-      <url>file://C:/123</url>
+      <id>gitlab-maven</id>
+      <url>https://gitlab.com/api/v4/projects/25554324/packages/maven</url>
     </repository>
+    <snapshotRepository>
+      <id>gitlab-maven</id>
+      <url>https://gitlab.com/api/v4/projects/25554324/packages/maven</url>
+    </snapshotRepository>
   </distributionManagement>
 
   <properties>

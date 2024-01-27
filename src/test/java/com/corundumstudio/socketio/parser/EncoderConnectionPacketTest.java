@@ -15,12 +15,15 @@
  */
 package com.corundumstudio.socketio.parser;
 
+import com.corundumstudio.socketio.protocol.EngineIOVersion;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.Unpooled;
 import io.netty.util.CharsetUtil;
 
 import java.io.IOException;
 
+import java.util.ArrayList;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -30,39 +33,48 @@ import com.corundumstudio.socketio.protocol.PacketType;
 public class EncoderConnectionPacketTest extends EncoderBaseTest {
 
     @Test
-    public void testEncodeHeartbeat() throws IOException {
-//        Packet packet = new Packet(PacketType.HEARTBEAT);
+    public void testEncodePingV4() throws IOException {
+        Packet packet = new Packet(PacketType.PING, EngineIOVersion.V4);
+        ByteBuf result = Unpooled.buffer();
+        encoder.encodePacket(packet, result, ByteBufAllocator.DEFAULT, false);
+        Assert.assertEquals("2", result.toString(CharsetUtil.UTF_8));
+    }
+
+//    @Test
+//    public void testEncodePingV2() throws IOException {
+//        Packet packet = new Packet(PacketType.PING, EngineIOVersion.V2);
 //        ByteBuf result = Unpooled.buffer();
-//        encoder.encodePacket(packet, result);
-//        Assert.assertEquals("2::", result.toString(CharsetUtil.UTF_8));
+//        encoder.encodePacket(packet, result, ByteBufAllocator.DEFAULT, false);
+//        Assert.assertEquals("2", result.toString(CharsetUtil.UTF_8));
+//    }
+
+    @Test
+    public void testEncodeDisconnectionCustomNamespace() throws IOException {
+        Packet packet = new Packet(PacketType.MESSAGE, EngineIOVersion.V4);
+        packet.setSubType(PacketType.DISCONNECT);
+        packet.setNsp("/woot");
+        ByteBuf result = Unpooled.buffer();
+        encoder.encodePacket(packet, result, ByteBufAllocator.DEFAULT, false);
+        Assert.assertEquals("41/woot,", result.toString(CharsetUtil.UTF_8));
     }
 
     @Test
     public void testEncodeDisconnection() throws IOException {
-        Packet packet = new Packet(PacketType.DISCONNECT);
-        packet.setNsp("/woot");
+        Packet packet = new Packet(PacketType.MESSAGE, EngineIOVersion.V4);
+        packet.setSubType(PacketType.DISCONNECT);
         ByteBuf result = Unpooled.buffer();
-//        encoder.encodePacket(packet, result);
-        Assert.assertEquals("0::/woot", result.toString(CharsetUtil.UTF_8));
+        encoder.encodePacket(packet, result, ByteBufAllocator.DEFAULT, false);
+        Assert.assertEquals("41", result.toString(CharsetUtil.UTF_8));
     }
 
     @Test
     public void testEncode() throws IOException {
-        Packet packet = new Packet(PacketType.CONNECT);
+        Packet packet = new Packet(PacketType.MESSAGE, EngineIOVersion.V4);
+        packet.setSubType(PacketType.CONNECT);
         packet.setNsp("/tobi");
         ByteBuf result = Unpooled.buffer();
-//        encoder.encodePacket(packet, result);
-        Assert.assertEquals("1::/tobi", result.toString(CharsetUtil.UTF_8));
-    }
-
-    @Test
-    public void testEncodePacketWithQueryString() throws IOException {
-        Packet packet = new Packet(PacketType.CONNECT);
-        packet.setNsp("/test");
-//        packet.setQs("?test=1");
-        ByteBuf result = Unpooled.buffer();
-//        encoder.encodePacket(packet, result);
-        Assert.assertEquals("1::/test:?test=1", result.toString(CharsetUtil.UTF_8));
+        encoder.encodePacket(packet, result, ByteBufAllocator.DEFAULT, false);
+        Assert.assertEquals("40/tobi", result.toString(CharsetUtil.UTF_8));
     }
 
 }

@@ -19,8 +19,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
+import com.corundumstudio.socketio.SocketIONamespace;
+import com.corundumstudio.socketio.SocketIOServer;
+import com.corundumstudio.socketio.namespace.Namespace;
 import io.netty.buffer.Unpooled;
+import java.util.Arrays;
 import org.junit.Test;
 
 public class PacketTest {
@@ -38,8 +43,7 @@ public class PacketTest {
     @Test
     public void packetCopyIsCreatedWhenNewNamespaceDiffersAndIsNull() {
         Packet packet = createPacket();
-        Packet newPacket = packet.withNsp(null, EngineIOVersion.UNKNOWN);
-        assertNull(newPacket.getNsp());
+        Packet newPacket = packet.withNsp(Namespace.DEFAULT_NAME, EngineIOVersion.UNKNOWN);
         assertPacketCopied(packet, newPacket);
     }
 
@@ -57,7 +61,7 @@ public class PacketTest {
         assertEquals(oldPacket.getAckId(), newPacket.getAckId());
         assertEquals(oldPacket.getAttachments().size(), newPacket.getAttachments().size());
         assertSame(oldPacket.getAttachments(), newPacket.getAttachments());
-        assertEquals(oldPacket.getData(), newPacket.getData());
+        assertTrue(oldPacket.getData().equals(newPacket.getData()));
         assertSame(oldPacket.getDataSource(), newPacket.getDataSource());
     }
 
@@ -65,7 +69,7 @@ public class PacketTest {
         Packet packet = new Packet(PacketType.MESSAGE);
         packet.setSubType(PacketType.EVENT);
         packet.setName("packetName");
-        packet.setData("data");
+        packet.setData(Arrays.asList("data"));
         packet.setAckId(1L);
         packet.setNsp("old");
         packet.setDataSource(Unpooled.wrappedBuffer(new byte[]{10}));

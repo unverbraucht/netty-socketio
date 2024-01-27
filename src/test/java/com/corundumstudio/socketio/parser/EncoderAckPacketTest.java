@@ -15,12 +15,15 @@
  */
 package com.corundumstudio.socketio.parser;
 
+import com.corundumstudio.socketio.protocol.EngineIOVersion;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.Unpooled;
 import io.netty.util.CharsetUtil;
 
 import java.io.IOException;
 
+import java.util.Arrays;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -31,21 +34,24 @@ public class EncoderAckPacketTest extends EncoderBaseTest {
 
     @Test
     public void testEncode() throws IOException {
-        Packet packet = new Packet(PacketType.ACK);
+        Packet packet = new Packet(PacketType.MESSAGE, EngineIOVersion.V4);
+        packet.setSubType(PacketType.ACK);
         packet.setAckId(140L);
+        packet.setData(Arrays.asList());
         ByteBuf result = Unpooled.buffer();
-//        encoder.encodePacket(packet, result);
-        Assert.assertEquals("6:::140", result.toString(CharsetUtil.UTF_8));
+        encoder.encodePacket(packet, result, ByteBufAllocator.DEFAULT, false);
+        Assert.assertEquals("43140[]", result.toString(CharsetUtil.UTF_8));
     }
 
     @Test
     public void testEncodeWithArgs() throws IOException {
-        Packet packet = new Packet(PacketType.ACK);
+        Packet packet = new Packet(PacketType.MESSAGE, EngineIOVersion.V4);
+        packet.setSubType(PacketType.ACK);
         packet.setAckId(12L);
-//        packet.setArgs(Arrays.<Object>asList("woot", "wa"));
+        packet.setData(Arrays.<Object>asList("woot", "wa"));
         ByteBuf result = Unpooled.buffer();
-//        encoder.encodePacket(packet, result);
-        Assert.assertEquals("6:::12+[\"woot\",\"wa\"]", result.toString(CharsetUtil.UTF_8));
+        encoder.encodePacket(packet, result, ByteBufAllocator.DEFAULT, false);
+        Assert.assertEquals("4312[\"woot\",\"wa\"]", result.toString(CharsetUtil.UTF_8));
     }
 
 }

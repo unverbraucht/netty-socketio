@@ -47,7 +47,7 @@
   </distributionManagement>
 
   <properties>
-    <skipTests>true</skipTests>
+    <skipTests>false</skipTests>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <netty.version>4.1.100.Final</netty.version>
   </properties>

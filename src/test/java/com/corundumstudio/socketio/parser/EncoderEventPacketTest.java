@@ -15,12 +15,17 @@
  */
 package com.corundumstudio.socketio.parser;
 
+import com.corundumstudio.socketio.protocol.EngineIOVersion;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.Unpooled;
 import io.netty.util.CharsetUtil;
 
 import java.io.IOException;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -31,33 +36,52 @@ public class EncoderEventPacketTest extends EncoderBaseTest {
 
     @Test
     public void testEncode() throws IOException {
-        Packet packet = new Packet(PacketType.EVENT);
+        Packet packet = new Packet(PacketType.MESSAGE, EngineIOVersion.V4);
+        packet.setSubType(PacketType.EVENT);
         packet.setName("woot");
+        packet.setData(Arrays.asList());
         ByteBuf result = Unpooled.buffer();
-//        encoder.encodePacket(packet, result);
-        Assert.assertEquals("5:::{\"name\":\"woot\"}", result.toString(CharsetUtil.UTF_8));
+        encoder.encodePacket(packet, result, ByteBufAllocator.DEFAULT, false);
+        Assert.assertEquals("42[\"woot\"]", result.toString(CharsetUtil.UTF_8));
     }
 
     @Test
     public void testEncodeWithMessageIdAndAck() throws IOException {
-        Packet packet = new Packet(PacketType.EVENT);
-//        packet.setId(1L);
-//        packet.setAck(Packet.ACK_DATA);
+        Packet packet = new Packet(PacketType.MESSAGE, EngineIOVersion.V4);
+        packet.setSubType(PacketType.EVENT);
+
+        packet.setAckId(1L);
         packet.setName("tobi");
+        packet.setData(Arrays.asList());
         ByteBuf result = Unpooled.buffer();
-//        encoder.encodePacket(packet, result);
-        Assert.assertEquals("5:1+::{\"name\":\"tobi\"}", result.toString(CharsetUtil.UTF_8));
+        encoder.encodePacket(packet, result, ByteBufAllocator.DEFAULT, false);
+        Assert.assertEquals("421[\"tobi\"]", result.toString(CharsetUtil.UTF_8));
     }
 
     @Test
     public void testEncodeWithData() throws IOException {
-        Packet packet = new Packet(PacketType.EVENT);
+        Packet packet = new Packet(PacketType.MESSAGE, EngineIOVersion.V4);
+        packet.setSubType(PacketType.EVENT);
         packet.setName("edwald");
-//        packet.setArgs(Arrays.asList(Collections.singletonMap("a", "b"), 2, "3"));
+        packet.setData(Arrays.asList(Collections.singletonMap("a", "b"), 2, "3"));
         ByteBuf result = Unpooled.buffer();
-//        encoder.encodePacket(packet, result);
-        Assert.assertEquals("5:::{\"name\":\"edwald\",\"args\":[{\"a\":\"b\"},2,\"3\"]}",
+        encoder.encodePacket(packet, result, ByteBufAllocator.DEFAULT, false);
+        Assert.assertEquals("42[\"edwald\",{\"a\":\"b\"},2,\"3\"]",
                                     result.toString(CharsetUtil.UTF_8));
+    }
+
+    @Test
+    public void testEncodePacketWithQueryString() throws IOException {
+        Packet packet = new Packet(PacketType.MESSAGE, EngineIOVersion.V4);
+        packet.setSubType(PacketType.EVENT);
+        final ArrayList<String> argsList = new ArrayList<>();
+        packet.setName("event");
+        argsList.add("testdata");
+        packet.setData(argsList);
+        packet.setNsp("/test");
+        ByteBuf result = Unpooled.buffer();
+        encoder.encodePacket(packet, result, ByteBufAllocator.DEFAULT, false);
+        Assert.assertEquals("42/test,[\"event\",\"testdata\"]", result.toString(CharsetUtil.UTF_8));
     }
 
 }

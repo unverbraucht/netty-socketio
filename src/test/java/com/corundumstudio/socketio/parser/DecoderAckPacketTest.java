@@ -37,7 +37,7 @@ public class DecoderAckPacketTest extends DecoderBaseTest {
 
     @Test
     public void testDecode() throws IOException {
-        Packet packet = decoder.decodePackets(Unpooled.copiedBuffer("6:::140", CharsetUtil.UTF_8), null);
+        Packet packet = decoder.decodePackets(Unpooled.copiedBuffer("43140[]", CharsetUtil.UTF_8), null);
         Assert.assertEquals(PacketType.ACK, packet.getType());
         Assert.assertEquals(140, (long)packet.getAckId());
 //        Assert.assertTrue(packet.getArgs().isEmpty());
